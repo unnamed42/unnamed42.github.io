@@ -156,7 +156,10 @@ html_minifier:
   minifyJS: true
   minifyURLs: true
   collapseWhitespace: true
+  removeComments: true
   removeAttributeQuotes: true
+  removeEmptyAttributes: true
+  removeRedundantAttributes: true
   processScripts: 
     - "text/x-mathjax-config"
   useShortDoctype: true
