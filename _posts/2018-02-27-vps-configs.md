@@ -73,6 +73,18 @@ Host bwg
 
 完成之后，你就能直接`ssh bwg`连接你的服务器了。
 
+## 使用zsh
+
+zsh配置好的话，在各种方面都比bash强不少。我个人是喜欢用zsh的，加上[grml-zsh-config](https://grml.org/zsh/)简直上天。
+
+首先安装zsh：`apt install zsh`；然后切换默认shell为zsh：`chsh -s $(which zsh)`
+
+然后下载grml-zshrc：
+
+```bash
+wget -O ~/.zshrc https://git.grml.org/f/grml-etc-core/etc/zsh/zshrc
+```
+
 ## systemd everything!
 
 有鉴于在使用Fedora时的糟糕体验，我果断把系统从CentOS换到了Debian 9{% spoiler 才不是嫌弃CentOS软件太老呢 %}。同时作为一名Archlinux老教徒，我觉得把系统全面systemd化挺好的。但是Debian里面有不少的sysvinit残留，因此只能做最大努力去办了。
