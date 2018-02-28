@@ -6,9 +6,9 @@ comments: true
 categories: 学习
 tags: [VPS, 配置]
 ---
-出于弄个完全在掌控之中的梯子的想法，我在一月时抢到了[搬瓦工中国大陆直连优化套餐](https://bwh1.net/cart.php?a=confproduct&i=0)，512M内存、10G SSD、1T流量/月、$19.99（￥120左右）/年，走过路过不要错过。在此感谢知乎[@冯硕](https://www.zhihu.com/people/feng-shuo-3)的回答[有哪些便宜稳定，速度也不错的Linux VPS 推荐？](https://www.zhihu.com/question/20800554/answer/71397836)搬瓦工价格亲民，支付方便（可以支付宝），还不快去买？
+出于弄个完全在掌控之中的梯子的想法，我在一月时抢到了[搬瓦工中国大陆直连优化套餐](https://bwh1.net/aff.php?aff=3525&pid=53)，512M内存、10G SSD、1T流量/月、超高带宽、$19.99（￥120左右）/年，走过路过不要错过。在此感谢知乎[@冯硕](https://www.zhihu.com/people/feng-shuo-3)的回答[有哪些便宜稳定，速度也不错的Linux VPS 推荐？](https://www.zhihu.com/question/20800554/answer/71397836)搬瓦工价格亲民，支付方便（可以支付宝），还不快去买？
 
-大陆特供套餐相比普通版据说是对大陆三网有优化，而且相比通用套餐月流量翻了一倍，不过唯一的缺点是只有一个机房给你使用，也就是说出了事的话你的IP是换不了的，所以对自己的IP要且用且珍惜。[电信CN2特别版](https://www.bwh1.net/cart.php?a=add&pid=56)贵了10美金，个人觉得不是那么值，毕竟走来回一趟洛杉矶100ms延迟是跑不了的。
+大陆特供套餐相比普通版据说是对大陆三网有优化，而且相比[通用套餐](https://bwh1.net/cart.php?a=add&pid=43)月流量翻了一倍，不过唯一的缺点是只有一个机房给你使用，也就是说出了事的话你的IP是换不了的，换句话说这个VPS你就砸手上了（购买30天内可退款，这样至少损失不大），所以且用且珍惜。[电信CN2特别版](http://www.bwh1.net/aff.php?aff=3525&pid=56)贵了10美金，除了电信用户速度提升之外，硬盘也给砍了5G。个人觉得不是那么值，毕竟走来回一趟洛杉矶100ms延迟是跑不了的。
 
 对了，购买的时候尽量买KVM架构的，完全虚拟，可以玩的黑科技比OpenVZ架构的不知道多到哪里去了。
 
@@ -26,7 +26,7 @@ tags: [VPS, 配置]
 
 搬瓦工在这方面做得好，默认ssh端口和默认root密码都是随机的。不过我们要在此基础上更进一步，使用密钥登录ssh并禁止密码登录。首先生成我们的ssh密钥，在本地或者服务器端都可以：
 
-```Shell
+```bash
 ssh-keygen -t rsa
 ```
 
@@ -34,7 +34,7 @@ ssh-keygen -t rsa
 
 完成之后应该会生成两个文件，`id_rsa`（私钥）和`id_rsa.pub`（公钥）。把公钥文件弄进服务器端的`~/.ssh/authorized_keys`文件里面就差不多了。在服务器端生成的就直接`mv`，记得把私钥弄下来；本地生成的就使用
 
-```Shell
+```bash
 cat ~/.ssh/id_rsa.pub | ssh <username>@<address> "mkdir -p ~/.ssh && chmod 700 ~/.ssh && cat >>  ~/.ssh/authorized_keys"
 ```
 
@@ -75,7 +75,7 @@ Host bwg
 
 ## systemd everything!
 
-有鉴于在使用Fedora时的糟糕体验，我果断把系统从CentOS换到了Debian 9。同时作为一名Archlinux老教徒，我觉得把系统全面systemd化挺好的。但是Debian里面有不少的sysvinit残留，因此只能做最大努力去办了。
+有鉴于在使用Fedora时的糟糕体验，我果断把系统从CentOS换到了Debian 9{% spoiler 才不是嫌弃CentOS软件太老呢 %}。同时作为一名Archlinux老教徒，我觉得把系统全面systemd化挺好的。但是Debian里面有不少的sysvinit残留，因此只能做最大努力去办了。
 
 下面这两条是参照文档`/usr/share/doc/systemd/README.Debian.gz`提取出来的。
 
@@ -83,14 +83,14 @@ Host bwg
 
 首先开启journald的persistent logging：
 
-```Shell
+```bash
 mkdir -p /var/log/journal
 systemd-tmpfiles --create --prefix /var/log/journal
 ```
 
 然后卸载rsyslog：
 
-```Shell
+```bash
 apt purge rsyslog
 ```
 
@@ -108,16 +108,16 @@ DHCP=yes
 
 之后`stop` `disable`掉`networking.service`, 然后`systemctl enable systemd-networkd`, `systemctl start systemd-networkd`二连，顺便卸载掉`ifupdown`，`rm -r`掉`/etc/network`。
 
-文档中推荐的做法是networkd配合resolved使用：
+此外，文档中还建议networkd配合resolved使用：
 
-```Shell
+```bash
 systemctl enable systemd-resolved
 ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
 ```
 
 ## 开启BBR算法
 
-BBR是Google开发的TCP拥塞控制算法，目的是要尽量跑满带宽, 并且尽量不要有排队的情况, 效果并不比锐速差。BBR算法已经合并进了kernel 4.9，所以尊贵的Debian 9用户不需要编译内核，改配置就行了。
+BBR是Google开发的TCP拥塞控制算法，目的是要尽量跑满带宽, 并且尽量不要有排队的情况, 效果并不比锐速差。开启主要是为了配合SS，给它提速用。BBR算法已经合并进了kernel 4.9，所以尊贵的Debian 9用户不需要编译内核，改配置就行了。OpenVZ玩家没法修改内核配置，所以……洗洗睡吧。
 
 在`/etc/sysctl.d/`下新建一个`10-bbr.conf`文件，内容如下：
 
@@ -192,7 +192,7 @@ DHCP=yes
 Tunnel=he-ipv6
 ```
 
-重启`systemd-networkd`，使用`ping6 ipv6.google.com`试试，如果成功那么说明配置成功，你也可以用IPv6来访问VPS了。用于VPS的公网IPv6地址是提供给你的`Client IPv6 Address`，不要用错了。你可以通过VPS代理让全部流量走IPv6，这样一来校园网是完全的白嫖，想想还有点小激动呢。
+刷新`systemd-networkd`，使用`ping6 ipv6.google.com`试试，如果成功那么说明配置成功，你也可以用IPv6来访问VPS了。用于VPS的公网IPv6地址是提供给你的`Client IPv6 Address`，不要用错了。你可以通过VPS代理让全部流量走IPv6，这样一来校园网是完全的白嫖，想想还有点小激动呢。
 
 如果你确定你的配置没有问题，但是就是使用不了IPv6，有可能是防火墙的问题，检查一下你的`ip6tables`配置吧。{% spoiler 我tm因为ip6tables没开导致IPv6包全部被屏蔽，被这个坑了好久 %}
 
@@ -202,7 +202,7 @@ Tunnel=he-ipv6
 
 使用下面的命令来清空`iptables`配置：
 
-```Shell
+```bash
 iptables -F
 iptables -X
 iptables -Z
@@ -211,7 +211,7 @@ iptables -Z
 接下来就是一通骚操作了：
 
 ```bash
-# 允许本地回环接口(即运行本机访问本机)，一定要有
+# 允许本地回环接口(即允许本机访问本机)，一定要有
 iptables -A INPUT -i lo -j ACCEPT
 # 允许IPv6 tunnel，使用前面的IPv6配置的话一定要有
 iptables -A INPUT -p ipv6 -j ACCEPT
