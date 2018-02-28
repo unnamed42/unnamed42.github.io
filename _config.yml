@@ -154,7 +154,12 @@ html_minifier:
   minifyCSS: true
   minifyJS: true
   minifyURLs: true
+  ignoreCustomComments:
+    - !!js/regexp /^\s*more/
+  removeComments: true
+  removeCommentsFromCDATA: true
   collapseWhitespace: true
+  collapseBooleanAttributes: true
   removeEmptyAttributes: true
   removeRedundantAttributes: true
   processScripts:
