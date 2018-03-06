@@ -40,21 +40,21 @@ systemctl enable shadowsocks-libev-server@config.service && systemctl start shad
 
 如果你需要IPv4和IPv6双栈的SS，那么针对`shadowsocks-libev`来说`server`得设置成`["[::0]","0.0.0.0"]`。网上其他文章里说设置成`"[::0]"`就行的，那是针对其他SS服务器端，在`shadowsocks-libev`就得这么设置。
 
-`server_port`是给SS服务器端分配的端口号，记得选个不那么常用的（被各大教程使用的8080端口由于使用人数太多导致极其容易被监测）。如果你没有建站的需求，可以考虑占用https的443端口假装是在上网。
+`server_port`是给SS服务器端分配的端口号，记得选个不那么常用的（被各大教程使用的8080端口由于使用人数太多导致极其容易被监测）。还有些人喜欢占用https的443端口假装自己是在浏览网页，其实这种做法……破绽很大，因为能够在443上面发现明显不是https协议的通讯。要想真正的假装在上http/https，还得用SSR的混淆功能，或者是`simple-obfs`插件。
 
-`fast_open`不建议开启，会增大你被发现的机率[^1]。
+`fast_open`建议关闭，开启的话会增大你被发现的机率[^1]。
 
-`method`指定一个加密算法，最简单、计算速度最快的是`rc4-md5`但是容易被查出来（RC4和MD5算法都已经被攻破了）；普世性好的是`aes-256-cfb`；新潮的就使用`chacha20`系列（计算量来说对移动客户端友好），但是可能部分SS客户端不支持这系列算法。在这里要强调一点：SS的加密算法设计出来并不是为了保证数据安全，而是为了增加方校长他们的监测难度。加密算法在网络速度中占不了太大比重，反倒是服务器带宽最重要。
+`method`指定一个加密算法，最简单、计算速度最快的是`rc4-md5`但是容易被查出来（RC4和MD5算法都已经被攻破了）；兼容性好的是`aes-256-cfb`；新潮的就使用`chacha20`系列（计算量比AES系列小，因此对移动端有加成），但是可能部分SS客户端不支持这系列算法。在这里要强调一点：SS的加密算法设计出来并不是为了保证数据安全，而是为了加密流量增加方校长他们的监测难度。加密算法在网络速度中占不了太大比重，反倒是服务器带宽最重要。
 
 iOS的SS客户端我使用[FirstWingy](https://itunes.apple.com/us/app/firstwingy/id1316416848?mt=8)（不支持SSR），Wingy国区弄不到，小火箭又要钱……
 
-如果你担心自己的SS被查出来，那么可以去使用SSR；如果你觉得你的SS速度太慢，可以外面套一层[kcptun](https://github.com/xtaci/kcptun)加速（kcptun是通过多发包消耗流量来换取速度，慎用）。
+如果你担心自己的SS被查出来，那么可以去使用SSR开启混淆；如果你觉得你的SS速度太慢，可以外面套一层[kcptun](https://github.com/xtaci/kcptun)加速（kcptun是通过多发包消耗流量来换取速度，慎用）。
 
 如果你想给SS配置多个用户的话，那么删掉`server_port`和`password`，改成如下内容：
 
 ```JSON
 {
-    ...
+    ...,
     "port_password": {
         "<port1>": "<password1>",
         "<port2>": "<password2>",
@@ -62,6 +62,21 @@ iOS的SS客户端我使用[FirstWingy](https://itunes.apple.com/us/app/firstwing
     },
     ...
 }
+```
+
+但是`shadowsocks-libev`主程序`ss-server`不支持`port_password`选项，要么更换成`ss-manager`，要么`ss-server`多开。下面是我用的systemd service unit文件（文件名为`ss-manager@.service`）：
+
+```INI
+[Unit]
+Description=Shadowsocks manager server
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/ss-manager --manager-address /var/run/shadowsocks-manager.sock -c /etc/shadowsocks-libev/%i.json
+
+[Install]
+WantedBy=multi-user.target
 ```
 
 不过据说SS给多人使用会增加被发现的机率。
@@ -140,7 +155,7 @@ WantedBy=multi-user.target
 
 如果你需要BT作种，得开放对应的端口。在VPS上其实不推荐使用BT下载，因为盗版大多数是BT，VPS服务商为了避免版权纠纷在这方面查得比较严，稍有不慎你的VPS就可能会被封掉。
 
-配置好aria2后端之后推荐使用一个WebUI配套。我个人推荐使用[AriaNG](https://github.com/mayswind/AriaNg)，还有很多其他的可以用。你可以把WebUI放到自己的VPS上自己弄，也可以用别人做好的。这些是比较有名的WebUI：
+配置好aria2后端之后推荐使用一个WebUI配套。我个人推荐使用[AriaNG](https://github.com/mayswind/AriaNg)，还有很多其他的可以用。你可以在自己的VPS上放一个WebUI，也可以用别人做好的。WebUI在哪里都无所谓，毕竟是远程管理不用和aria2后端放在一起。以下是比较有名的WebUI：
 
 * AriaNG - [source](https://github.com/mayswind/AriaNg) - [WebUI](http://ariang.mayswind.net/latest/)
 * webui-aria2 - [source](https://github.com/ziahamza/webui-aria2) - [WebUI](https://ziahamza.github.io/webui-aria2/)

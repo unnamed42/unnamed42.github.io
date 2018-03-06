@@ -8,7 +8,7 @@ tags: [VPS, 配置]
 ---
 出于弄个完全在掌控之中的梯子的想法，我在一月时抢到了[搬瓦工中国大陆直连优化套餐](https://bwh1.net/aff.php?aff=3525&pid=53)，512M内存、10G SSD、1T流量/月、超高带宽、$19.99（￥120左右）/年，走过路过不要错过。在此感谢知乎[@冯硕](https://www.zhihu.com/people/feng-shuo-3)的回答[有哪些便宜稳定，速度也不错的Linux VPS 推荐？](https://www.zhihu.com/question/20800554/answer/71397836)搬瓦工价格亲民，支付方便（可以支付宝），还不快去买？
 
-大陆特供套餐相比普通版据说是对大陆三网有优化，而且相比[通用套餐](https://bwh1.net/cart.php?a=add&pid=43)月流量翻了一倍，不过唯一的缺点是只有一个机房给你使用，也就是说出了事的话你的IP是换不了的，换句话说这个VPS你就砸手上了（购买30天内可退款，这样至少损失不大），所以且用且珍惜。[电信CN2特别版](http://www.bwh1.net/aff.php?aff=3525&pid=56)贵了10美金，除了电信用户速度提升之外，硬盘也给砍了5G。个人觉得不是那么值，毕竟走来回一趟洛杉矶100ms延迟是跑不了的。
+直连优化套餐相比[通用套餐](https://bwh1.net/cart.php?a=add&pid=43)据说是对大陆三网有优化，而且相比来说月流量翻了一倍，不过唯一的缺点是只有一个机房给你使用，也就是说出了事的话你的IP是换不了的，换句话说这个VPS你就砸手上了（购买30天内可退款，这样至少损失不大），所以且用且珍惜。[电信CN2特别版](http://www.bwh1.net/aff.php?aff=3525&pid=56)贵了10美金，除了电信用户速度提升之外，硬盘也给砍了5G。个人觉得不是那么值，毕竟走来回一趟洛杉矶100ms延迟是跑不了的。
 
 对了，购买的时候尽量买KVM架构的，完全虚拟，可以玩的黑科技比OpenVZ架构的不知道多到哪里去了。
 
@@ -75,7 +75,7 @@ Host bwg
 
 ## 使用zsh
 
-zsh配置好的话，在各种方面都比bash强不少。我个人是喜欢用zsh的，加上[grml-zsh-config](https://grml.org/zsh/)简直上天。
+zsh配置好的话，在各种方面都比bash强不少。我个人是喜欢用zsh的，加上[grml-zsh-config](https://grml.org/zsh/)体验简直上天。
 
 首先安装zsh：`apt install zsh`；然后切换默认shell为zsh：`chsh -s $(which zsh)`
 
@@ -108,7 +108,7 @@ apt purge rsyslog
 
 ### 用networkd接管网络配置
 
-在`/etc/systemd/network`创建文件`default.network`（文件名其实无所谓，重要的是扩展名`network`），内容如下：
+在`/etc/systemd/network/`创建文件`default.network`（文件名其实无所谓，重要的是扩展名`network`），内容如下：
 
 ```INI
 [Match]
@@ -118,7 +118,7 @@ Name=eth0
 DHCP=yes
 ```
 
-之后`stop` `disable`掉`networking.service`, 然后`systemctl enable systemd-networkd`, `systemctl start systemd-networkd`二连，顺便卸载掉`ifupdown`，`rm -r`掉`/etc/network`。
+之后`stop`, `disable`掉`networking.service`, 然后`systemctl enable systemd-networkd`, `systemctl start systemd-networkd`二连，顺便卸载掉`ifupdown`，`rm -r`掉`/etc/network`。
 
 此外，文档中还建议networkd配合resolved使用：
 
@@ -129,7 +129,7 @@ ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
 
 ## 开启BBR算法
 
-BBR是Google开发的TCP拥塞控制算法，目的是要尽量跑满带宽, 并且尽量不要有排队的情况, 效果并不比锐速差。开启主要是为了配合SS，给它提速用。BBR算法已经合并进了kernel 4.9，所以尊贵的Debian 9用户不需要编译内核，改配置就行了。OpenVZ玩家没法修改内核配置，所以……洗洗睡吧。
+BBR是Google开发的TCP拥塞控制算法，目的是要尽量跑满带宽, 并且尽量不要有排队的情况, 效果并不比锐速差。开启主要是为了配合SS，给它提速用。BBR算法已经合并进了kernel 4.9，所以尊贵的Debian 9用户不需要自己编译内核，改配置就行了。OpenVZ玩家没法修改内核配置，所以……洗洗睡吧。
 
 在`/etc/sysctl.d/`下新建一个`10-bbr.conf`文件，内容如下：
 
@@ -152,7 +152,7 @@ net.ipv6.conf.default.disable_ipv6 = 0
 net.ipv6.conf.lo.disable_ipv6 = 0
 ```
 
-由于KVM是完全的虚拟，所以可以方便地借助tunnel的力量来使用IPv6。首先上[tunnelbroker](https://tunnelbroker.net/)注册个帐号，并创建一个Regular Tunnel。输入你的VPS的IP，再选择一个**距离VPS最近的**Tunnel Server（一般填好IP之后它会自动选择），整个过程完全免费。创建完成之后，在tunnel详细信息页面会给出四个重要的IP地址：`Server IPv4 Address`, `Server IPv6 Address`, `Client IPv4 Address`, `Client IPv6 Address`. 假设我们看到的信息是这样的：
+由于KVM是完全的虚拟，所以可以方便地借助tunnel的力量来使用IPv6。首先上[tunnelbroker](https://tunnelbroker.net/)注册个帐号（申请和服务是完全免费的），并创建一个Regular Tunnel。输入你的VPS的IP，再选择一个**距离VPS最近的**Tunnel Server（一般填好IP之后它会自动选择）。创建完成之后，在tunnel详细信息页面会给出四个重要的IP地址：`Server IPv4 Address`, `Server IPv6 Address`, `Client IPv4 Address`, `Client IPv6 Address`. 假设我们看到的信息是这样的：
 
 ```plain
 Server IPv4 Address    1.1.1.1
@@ -225,12 +225,10 @@ iptables -Z
 ```bash
 # 允许本地回环接口(即允许本机访问本机)，一定要有
 iptables -A INPUT -i lo -j ACCEPT
-# 允许IPv6 tunnel，使用前面的IPv6配置的话一定要有
+# 允许6in4 tunnel，使用前面的HE Tunnel的话一定要有
 iptables -A INPUT -p ipv6 -j ACCEPT
 # 允许已建立的或相关连的通行
 iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
-# 允许所有本机向外的访问
-iptables -A OUTPUT -j ACCEPT
 # 允许访问http端口
 iptables -A INPUT -p tcp --dport 80 -j ACCEPT
 # 允许访问https端口
@@ -242,15 +240,17 @@ iptables -A INPUT -p tcp --dport <ssh-port> -j ACCEPT
 # iptables -A INPUT -p tcp -m multiport --dports 6881:6999 -j ACCEPT
 # 允许ping
 iptables -A INPUT -p icmp -m icmp --icmp-type 8 -j ACCEPT
+# 允许所有本机向外的访问
+iptables -A OUTPUT -j ACCEPT
 # 禁止其他未允许的规则访问，在执行这条之前一定记得把服务器端的ssh端口
 # 也放进允许规则中
 iptables -A INPUT -j REJECT
 iptables -A FORWARD -j REJECT
 ```
 
-`iptables`规则如果没保存的话，重启即失效。可以使用`iptables-save`来保存，`iptables-restore`来读取，可以做成systemd service unit来自动执行。可以安装这个包，打好了systemd service配置：https://github.com/srdja/debian-systemd-iptables/releases/download/1.1.0/systemd-iptables1.1-0.deb
+`iptables`规则如果没保存的话，重启即失效。可以使用`iptables-save`来保存，`iptables-restore`来读取，可以做成systemd service unit来自动执行。可以安装这个包，里面是打好了systemd service unit配置：[systemd-iptables1.1-0.deb](https://github.com/srdja/debian-systemd-iptables/releases/download/1.1.0/systemd-iptables1.1-0.deb)
 
-安装包之后，`enable` `start`二连，规则存储到`/etc/iptables/iptables.rules`即可。
+安装包之后，`enable`, `start`二连，规则存储到`/etc/iptables/iptables.rules`即可。
 
 ## apt相关
 
