@@ -10,6 +10,8 @@ tags: [VPS]
 
 如果你使用了`iptables`等防火墙，记得配置完之后开放对应的端口。
 
+UPDATED 2018/6/22: 修改SS配置样例
+
 <!-- more -->
 
 ## 科学上网
@@ -41,6 +43,8 @@ systemctl enable shadowsocks-libev-server@config.service && systemctl start shad
 如果你需要IPv4和IPv6双栈的SS，那么针对`shadowsocks-libev`来说`server`得设置成`["[::0]","0.0.0.0"]`。网上其他文章里说设置成`"[::0]"`就行的，那是针对其他SS服务器端，在`shadowsocks-libev`就得这么设置。
 
 `server_port`是给SS服务器端分配的端口号，记得选个不那么常用的（被各大教程使用的8080端口由于使用人数太多导致极其容易被监测）。还有些人喜欢占用https的443端口假装自己是在浏览网页，其实这种做法……破绽很大，因为能够在443上面发现明显不是https协议的通讯。要想真正的假装在上http/https，还得用SSR的混淆功能，或者是`simple-obfs`插件。
+
+在其他地方教程的配置文件中，可能会有`local_port`和`local_address`这两个对SS服务器端完全无用的条目，不建议填写。在`shadowsocks-libev`更新3.2.0之后，我的服务器端如果有这两个条目会直接导致服务器端启动报错。
 
 `fast_open`建议关闭，开启的话会增大你被发现的机率[^1]。
 
