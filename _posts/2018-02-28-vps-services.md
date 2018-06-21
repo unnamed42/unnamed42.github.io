@@ -30,8 +30,6 @@ systemctl enable shadowsocks-libev-server@config.service && systemctl start shad
 {
     "server": "0.0.0.0",
     "server_port": <ss-port-number>,
-    "local_address": "127.0.0.1",
-    "local_port": 1080,
     "password": "<ss-password>",
     "timeout": 60,
     "method": "aes-256-cfb",
