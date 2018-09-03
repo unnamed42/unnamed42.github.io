@@ -9,7 +9,7 @@ comments: true
 此外，本人联系方式：
 
 {% sns fa-qq 390517426 %}
-{% sns fa-envelope a390517426@gmail.com %}
+{% sns fa-envelope wenruih.cn@gmail.com %}
 {% sns fa-github unnamed42 https://github.com/unnamed42 %}
 
 因为我并不常用电子邮箱（而且来Gmail邮件也没App能给我推送一发），因此您的邮件有可能就这么石沉大海很久得不到回复……这里我要对之前发过邮件的人说一声抱歉。
