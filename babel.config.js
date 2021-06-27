@@ -4,7 +4,9 @@ module.exports = {
       exclude: [
         "transform-regenerator",
         "transform-async-to-generator"
-      ]
+      ],
+      useBuiltIns: "entry",
+      corejs: { version: "3.15" }
     }],
     ["@babel/preset-typescript", {
       onlyRemoveTypeImports: true, // recommended for fork-ts-webpack-plugin
@@ -18,8 +20,6 @@ module.exports = {
     }],
     ["@babel/plugin-transform-runtime", {
       regenerator: false,
-      corejs: 3,
-      useESModules: true
     }],
   ]
 }

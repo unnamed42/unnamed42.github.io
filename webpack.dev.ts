@@ -14,6 +14,9 @@ declare module "webpack-dev-server" {
 const config = merge(common, {
   mode: "development",
   devtool: "eval-cheap-module-source-map",
+  performance: {
+    hints: "warning",
+  },
   devServer: {
     static: [resolve(__dirname, "dist")],
     host: "0.0.0.0",

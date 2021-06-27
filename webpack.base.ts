@@ -1,9 +1,8 @@
-import { resolve, join } from "path";
-import type { Configuration } from "webpack";
-import HtmlWebpackPlugin from "html-webpack-plugin";
-import { CleanWebpackPlugin } from "clean-webpack-plugin";
 import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
-import { loader as MiniCssExtractLoader } from "mini-css-extract-plugin";
+import HtmlWebpackPlugin from "html-webpack-plugin";
+import MiniCssExtractPlugin from "mini-css-extract-plugin";
+import { join, resolve } from "path";
+import type { Configuration } from "webpack";
 
 const root = resolve("./");
 
@@ -13,7 +12,13 @@ const config: Configuration = {
     path: join(root, "/dist"),
     filename: "static/[name].[fullhash:5].js",
     chunkFilename: "static/[name].[fullhash:5].js",
-    publicPath: ""
+    assetModuleFilename: "static/[hash][ext][query]",
+    clean: true,
+    publicPath: "/"
+  },
+  performance: {
+    maxEntrypointSize: 5120000,
+    maxAssetSize: 5120000,
   },
   resolve: {
     extensions: [".ts", ".tsx", ".js"],
@@ -35,22 +40,24 @@ const config: Configuration = {
       },
       {
         test: /\.(png|svg|jpe?g|gif|woff2?|eot|ttf|otf)$/,
-        loader: require.resolve("file-loader"),
-        options: { outputPath: "assets" }
+        type: "asset/resource"
       },
       {
-        test: /\.s?css$/,
+        test: /\.(c|s[ac])ss$/,
         use: [
           {
-            loader: MiniCssExtractLoader,
+            loader: MiniCssExtractPlugin.loader,
             options: { esModule: true }
           },
           {
             loader: require.resolve("css-loader"),
             options: {
               modules: {
-                auto: /\.mod\.s?css$/,
-                exportLocalsConvention: "camelCaseOnly"
+                auto: /\.mod\.(c|s[ac])ss$/,
+                exportLocalsConvention: "camelCaseOnly",
+                localIdentName: process.env.NODE_ENV === "development" ?
+                  "[path][name]__[local]--[hash:base64:5]" :
+                  "[hash:base64:5]"
               },
               importLoaders: 2,
               esModule: true,
@@ -61,11 +68,7 @@ const config: Configuration = {
       }
     ]
   },
-  performance: {
-    hints: process.env.NODE_ENV === "production" ? "warning" : "error",
-  },
   plugins: [
-    new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
       filename: "index.html",
       template: join(root, "/src/index.html"),
@@ -79,6 +82,10 @@ const config: Configuration = {
         },
         mode: "write-references"
       }
+    }),
+    new MiniCssExtractPlugin({
+      filename: "static/[name].[fullhash:5].css",
+      chunkFilename: "static/[name].[fullhash:5].css",
     })
   ]
 };

@@ -6,6 +6,9 @@ import CssMinimizerPlugin from "css-minimizer-webpack-plugin";
 
 const config = merge(common, {
   mode: "production",
+  performance: {
+    hints: "error",
+  },
   plugins: [
     new BundleAnalyzerPlugin({
       analyzerMode: "static",
